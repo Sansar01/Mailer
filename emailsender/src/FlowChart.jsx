@@ -1,55 +1,37 @@
-import React, { useState } from 'react';
-import ReactFlow, {
-    ReactFlowProvider,
-    addEdge,
-    removeElements,
-    Controls,
-    MiniMap,
-} from 'react-flow-renderer';
-import axios from 'axios'
-
-function FlowChart() {
-
-    const [elements, setElements] = useState([]);
-    const [nodeId, setNodeId] = useState(1);
-
-    const onAddNode = (type) => {
-        const newNode = {
-            id: `node-${nodeId}`,
-            type: 'default',
-            position: { x: Math.random() * 250, y: Math.random() * 250 },
-            data: { label: type },
-        };
-        setNodeId(nodeId + 1);
-        setElements((els) => [...els, newNode]);
-    };
-
-    const onConnect = (params) => setElements((els) => addEdge(params, els));
-
-    const onSaveFlow = async () => {
-        const response = await axios.post('/api/save-flow', { elements });
-        console.log(response.data);
-    };
-
-    return (
-        <ReactFlowProvider>
-            <div style={{ height: 800 }}>
-                <ReactFlow
-                    elements={elements}
-                    onElementsRemove={(elsToRemove) =>
-                         setElements((els) => removeElements(elsToRemove, els))
-                    }
-                    onConnect={onConnect}
-                >
-                    <Controls />
-                    <MiniMap />
-                </ReactFlow>
-                <button onClick={() => onAddNode('Cold Email')}>Add Cold Email</button>
-                <button onClick={() => onAddNode('Wait/Delay')}>Add Wait/Delay</button>
-                <button onClick={onSaveFlow}>Save Flow</button>
-            </div>
-        </ReactFlowProvider>
-    )
+import React, { useCallback } from 'react';
+import {
+  ReactFlow,
+  useNodesState,
+  useEdgesState,
+  addEdge,
+} from '@xyflow/react';
+ 
+import '@xyflow/react/dist/style.css';
+ 
+const initialNodes = [
+  { id: '1', position: { x: 0, y: 0 }, data: { label: '1' } },
+  { id: '2', position: { x: 0, y: 100 }, data: { label: '2' } },
+];
+const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }];
+ 
+export default function FlowChart() {
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+ 
+  const onConnect = useCallback(
+    (params) => setEdges((eds) => addEdge(params, eds)),
+    [setEdges],
+  );
+ 
+  return (
+    <div style={{ width: '100vw', height: '100vh' }}>
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
+      />
+    </div>
+  );
 }
-
-export default FlowChart
