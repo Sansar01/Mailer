@@ -1,12 +1,16 @@
 import React, { useCallback } from 'react';
 import {
   ReactFlow,
+  MiniMap,
+  Controls,
+  Background,
   useNodesState,
   useEdgesState,
   addEdge,
 } from '@xyflow/react';
  
 import '@xyflow/react/dist/style.css';
+ 
  
 const initialNodes = [
   { id: '1', position: { x: 0, y: 0 }, data: { label: '1' } },
@@ -31,7 +35,11 @@ export default function FlowChart() {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
-      />
+      >
+        <Controls />
+        <MiniMap />
+        <Background variant="dots" gap={12} size={1} />
+      </ReactFlow>
     </div>
   );
 }
